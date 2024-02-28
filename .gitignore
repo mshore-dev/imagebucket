@@ -1,0 +1,4 @@
+imagebucket
+*.exe
+*.db
+uploads/*
