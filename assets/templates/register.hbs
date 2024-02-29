@@ -1,0 +1,25 @@
+{{> partials/header title=title }}
+
+<h2>Register to imagebucket</h2>
+
+<article>
+
+<form action="/auth/register" method="post">
+    <label for="username">
+        Username
+        <input type="text" name="username" id="username">
+    </label>
+    <label for="password">
+        Password
+        <input type="password" name="password" id="password">
+    </label>
+        <label for="password2">
+        Confirm password
+        <input type="password2" name="password2" id="password2">
+    </label>
+    <button type="submit">Log in</button>
+</form>
+
+</article>
+
+{{> partials/footer }}

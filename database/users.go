@@ -56,6 +56,20 @@ func GetUserByID(id int) (User, error) {
 	return u, nil
 }
 
+func GetUserByUsername(username string) (User, error) {
+
+	var u User
+
+	row := db.QueryRow("SELECT * FROM users WHERE username = ?", username)
+
+	err := row.Scan(&u.ID, &u.Username, &u.Password)
+	if err != nil {
+		return User{}, err
+	}
+
+	return u, nil
+}
+
 func CheckUserLogin(username, password string) (bool, error) {
 
 	var u User
@@ -77,7 +91,7 @@ func CheckUserLogin(username, password string) (bool, error) {
 		return false, err
 	}
 
-	return false, nil
+	return true, nil
 }
 
 func UpdateUser(id int, user User) error {
