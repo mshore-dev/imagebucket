@@ -1,0 +1,17 @@
+{{> partials/header title=title }}
+
+<h2>Welcome to imagebucket</h2>
+
+<article>
+
+<ul>
+    {{#each files}}
+        <li>
+            {{this.ID}} - {{this.Filename}} - {{this.OriginalFilename}}
+        </li>
+    {{/each}}
+</ul>
+
+</article>
+
+{{> partials/footer }}

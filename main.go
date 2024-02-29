@@ -5,9 +5,12 @@ import (
 	"log"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/template/handlebars/v2"
 
 	"github.com/mshore-dev/imagebucket/config"
+	"github.com/mshore-dev/imagebucket/database"
 	"github.com/mshore-dev/imagebucket/routes"
+	"github.com/mshore-dev/imagebucket/utils"
 )
 
 func main() {
@@ -19,10 +22,18 @@ func main() {
 
 	config.LoadConfig(*configFile)
 
-	app := fiber.New()
+	database.OpenDB()
+
+	utils.Setup()
+
+	app := fiber.New(fiber.Config{
+		Views: handlebars.New("./assets/templates", ".hbs"),
+	})
 
 	app.Static("/static", "./assets/static")
 
 	routes.RegisterRoutes(app)
+
+	log.Fatal(app.Listen(":8080"))
 
 }

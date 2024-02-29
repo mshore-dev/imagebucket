@@ -2,3 +2,6 @@ imagebucket
 *.exe
 *.db
 uploads/*
+data/*
+config.toml
+*.db-journal

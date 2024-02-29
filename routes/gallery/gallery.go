@@ -1,4 +1,4 @@
-package image
+package gallery
 
 import "github.com/gofiber/fiber/v2"
 

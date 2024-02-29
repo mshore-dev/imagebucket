@@ -26,11 +26,13 @@ type ConfigFile struct {
 
 	Database string `toml:"database"`
 
-	ServeFiles bool `toml:"serve_files"`
+	ServeFiles  bool   `toml:"serve_files"`
+	FileBaseURL string `toml:"file_base_url"`
 }
 
 func (c *ConfigFile) Defaults() {
 	c.URL = "http://localhost:8080/"
+	c.FileBaseURL = c.URL
 	c.Private = true
 
 	// stolen from lolisafe's default
@@ -59,6 +61,7 @@ func (c *ConfigFile) Defaults() {
 
 	c.Uploads.Folder = "uploads"
 	c.Uploads.MaxSize = "128M"
+	c.Uploads.IDLength = 10
 	c.Uploads.Hash = true
 
 	c.Database = "imagebucket.db"
@@ -73,7 +76,7 @@ func LoadConfig(file string) error {
 
 	log.Printf("loading config from %s ...\n", file)
 
-	_, err := toml.DecodeFile(file, Config)
+	_, err := toml.DecodeFile(file, &Config)
 	if err != nil {
 		log.Fatalf("could not read config file %s: %v\n", file, err)
 	}
