@@ -22,15 +22,26 @@ func RegisterRoutes(app *fiber.App) {
 
 func routeHome(c *fiber.Ctx) error {
 
-	files, err := database.GetFilesByUser(1, 2, 1)
-	if err != nil {
-		panic(err)
+	ctx := c.Context()
+
+	if ctx.UserValue("authenticated") == true {
+
+		files, err := database.GetFilesByUser(ctx.UserValue("userid").(int), 10, 0)
+		if err != nil {
+			panic(err)
+		}
+
+		return c.Render("home", fiber.Map{
+			"title":         "Home",
+			"authenticated": ctx.UserValue("authenticated"),
+			"username":      ctx.UserValue("username"),
+			"private":       config.Config.Private,
+			"files":         files,
+		})
 	}
 
-	c.Render("home", fiber.Map{
-		"title": "Home",
-		"files": files,
+	return c.Render("home", fiber.Map{
+		"title":   "Home",
+		"private": config.Config.Private,
 	})
-
-	return nil
 }

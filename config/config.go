@@ -7,10 +7,10 @@ import (
 )
 
 var (
-	Config ConfigFile
+	Config configFile
 )
 
-type ConfigFile struct {
+type configFile struct {
 	URL     string `toml:"url"`
 	Private bool   `toml:"private"`
 
@@ -30,7 +30,7 @@ type ConfigFile struct {
 	FileBaseURL string `toml:"file_base_url"`
 }
 
-func (c *ConfigFile) Defaults() {
+func (c *configFile) Defaults() {
 	c.URL = "http://localhost:8080/"
 	c.FileBaseURL = c.URL
 	c.Private = true

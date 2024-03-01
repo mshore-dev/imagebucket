@@ -14,7 +14,7 @@ import (
 func RegisterRoutes(app *fiber.App) {
 	app.Get("/auth/login", routeGetLogin)
 	app.Post("/auth/login", routePostLogin)
-	app.Post("/auth/logout", middleware.RequireAuthentication, routePostLogout)
+	app.Get("/auth/logout", middleware.RequireAuthentication, routeGetLogout)
 
 	app.Get("/auth/register", middleware.RestrictPrivateMode, routeGetRegister)
 	app.Post("/auth/register", middleware.RestrictPrivateMode, routePostRegister)
@@ -29,14 +29,12 @@ func routeGetLogin(c *fiber.Ctx) error {
 
 	if ctx.UserValue("authenticated") != nil {
 		// user is already signed in
-		c.Redirect("/")
+		return c.Redirect("/")
 	}
 
-	c.Render("login", fiber.Map{
+	return c.Render("login", fiber.Map{
 		"title": "Login",
 	})
-
-	return nil
 }
 
 func routePostLogin(c *fiber.Ctx) error {
@@ -88,25 +86,35 @@ func routePostLogin(c *fiber.Ctx) error {
 
 	sess.Set("authenticated", true)
 	sess.Set("userid", u.ID)
+
+	// TODO: error handling
 	sess.Save()
 
-	c.Redirect("/")
-
-	return nil
+	return c.Redirect("/")
 }
 
-func routePostLogout(c *fiber.Ctx) error {
+func routeGetLogout(c *fiber.Ctx) error {
 
-	return nil
+	sess, err := sessions.Get(c)
+	if err != nil {
+		log.Printf("failed to get session for /auth/logout: %v\n", err)
+
+		return c.Render("errors/500", fiber.Map{
+			"title":   "Error",
+			"message": "Failed to get session for logout.",
+		})
+	}
+
+	sess.Destroy()
+
+	return c.Redirect("/")
 }
 
 func routeGetRegister(c *fiber.Ctx) error {
 
-	c.Render("register", fiber.Map{
+	return c.Render("register", fiber.Map{
 		"title": "Register",
 	})
-
-	return nil
 }
 
 func routePostRegister(c *fiber.Ctx) error {
@@ -144,14 +152,38 @@ func routePostRegister(c *fiber.Ctx) error {
 		})
 	}
 
-	return nil
+	sess, err := sessions.Get(c)
+	if err != nil {
+		log.Printf("failed to get session for post-register login: %v\n)", err)
+
+		return c.Render("errors/500", fiber.Map{
+			"title":   "Error",
+			"message": "Could not look up session for post-register login.",
+		})
+	}
+
+	u, err := database.GetUserByUsername(username)
+	if err != nil {
+		log.Printf("failed to look up newly registered user: %v\n)", err)
+
+		return c.Render("errors/500", fiber.Map{
+			"title":   "Error",
+			"message": "Could not look up newly registered user.",
+		})
+	}
+
+	sess.Set("authenticated", true)
+	sess.Set("userid", u.ID)
+
+	// TODO: handle error here
+	sess.Save()
+
+	return c.Redirect("/")
 }
 
 func routeGetTest(c *fiber.Ctx) error {
 
 	ctx := c.Context()
 
-	c.SendString(fmt.Sprintf("authenticated: %b\nuserid: %d\nusername: %s\n", ctx.UserValue("authenticated"), ctx.UserValue("userid"), ctx.UserValue("username")))
-
-	return nil
+	return c.SendString(fmt.Sprintf("authenticated: %b\nuserid: %d\nusername: %s\n", ctx.UserValue("authenticated"), ctx.UserValue("userid"), ctx.UserValue("username")))
 }

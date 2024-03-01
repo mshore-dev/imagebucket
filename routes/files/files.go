@@ -7,21 +7,24 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/mshore-dev/imagebucket/config"
 	"github.com/mshore-dev/imagebucket/database"
+	"github.com/mshore-dev/imagebucket/middleware"
 	"github.com/mshore-dev/imagebucket/utils"
 )
 
 func RegisterRoutes(app *fiber.App) {
-	app.Post("/files/upload", routeFilesUpload)
+	app.Post("/files/upload", middleware.RequireAuthentication, routePostFilesUpload)
 }
 
-func routeFilesUpload(c *fiber.Ctx) error {
+func routePostFilesUpload(c *fiber.Ctx) error {
 
 	file, err := c.FormFile("file")
 	if err != nil {
-		c.Render("errors/500", fiber.Map{
-			"message": err.Error(),
+		log.Printf("failed to get formfile from request: %v\n", err)
+
+		return c.Render("errors/500", fiber.Map{
+			"title":   "Error",
+			"message": "Could not find file in POST request.",
 		})
-		panic(err)
 	}
 
 	localFilename := utils.GenerateID() + path.Ext(file.Filename)
@@ -33,10 +36,10 @@ func routeFilesUpload(c *fiber.Ctx) error {
 		log.Printf("failed to save uploaded file: %v\n", err)
 	}
 
-	err = database.CreateFile(localFilename, file.Filename, "", 1)
+	err = database.CreateFile(localFilename, file.Filename, "", c.Context().UserValue("userid").(int))
 	if err != nil {
 		log.Printf("failed to add file to db: %v\n", err)
 	}
 
-	return nil
+	return c.Redirect("/")
 }

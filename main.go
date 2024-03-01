@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/template/handlebars/v2"
 
 	"github.com/mshore-dev/imagebucket/config"
@@ -37,6 +38,8 @@ func main() {
 	// context, so that we can easily pull it later, without having to add
 	// extra complexity with sharing the session store.
 	app.Use(middleware.GetSession)
+
+	app.Use(logger.New())
 
 	routes.RegisterRoutes(app)
 
